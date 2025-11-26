@@ -1,0 +1,1770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyGrove - Focus & Grow</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        
+        /* Tree Animation */
+        @keyframes sway {
+            0%, 100% { transform: rotate(-2deg); }
+            50% { transform: rotate(2deg); }
+        }
+        @keyframes fall {
+            0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100px) rotate(360deg); opacity: 0; }
+        }
+        .tree-sway { animation: sway 4s ease-in-out infinite; transform-origin: bottom center; }
+        .leaf-fall { animation: fall 3s ease-in-out infinite; }
+        
+        /* Focus Mode Overlay */
+        .focus-overlay {
+            backdrop-filter: blur(10px);
+            background: rgba(0,0,0,0.9);
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #10b981; border-radius: 4px; }
+        
+        /* Progress Ring */
+        .progress-ring { transform: rotate(-90deg); }
+        
+        /* Glassmorphism */
+        .glass {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        /* Secret Konami */
+        .secret-activated {
+            background: linear-gradient(45deg, #ff006e, #8338ec, #3a86ff, #06d6a0) !important;
+            background-size: 400% 400%;
+            animation: gradient 3s ease infinite;
+        }
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        /* Calendar Styles */
+        .calendar-day:hover { background: #10b981; color: white; }
+        .calendar-day.has-data { border: 2px solid #10b981; }
+        .calendar-day.today { background: #10b981; color: white; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-slate-100">
+    
+    <!-- Main Container -->
+    <div class="flex min-h-screen">
+        
+        <!-- ========== LEFT SIDEBAR ========== -->
+        <nav class="w-20 lg:w-64 bg-gradient-to-b from-slate-800 to-slate-900 border-r border-slate-700 flex flex-col py-6 px-2 lg:px-4 shrink-0 fixed left-0 top-0 bottom-0 z-40 overflow-y-auto">
+            <!-- Logo -->
+            <div class="flex items-center gap-3 mb-8 px-2 justify-center lg:justify-start">
+                <div class="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center text-2xl shadow-lg shrink-0">🌲</div>
+                <span class="hidden lg:block text-xl font-bold text-emerald-400">StudyGrove</span>
+            </div>
+            
+            <!-- Navigation Menu -->
+            <div class="flex-1 space-y-2">
+                <button onclick="showTab('dashboard')" id="nav-dashboard" class="nav-btn active w-full flex items-center gap-3 px-3 py-3 rounded-xl transition justify-center lg:justify-start">
+                    <span class="text-xl">🏠</span>
+                    <span class="hidden lg:block font-medium">Dashboard</span>
+                </button>
+                <button onclick="showTab('pomodoro')" id="nav-pomodoro" class="nav-btn w-full flex items-center gap-3 px-3 py-3 rounded-xl transition justify-center lg:justify-start">
+                    <span class="text-xl">⏱️</span>
+                    <span class="hidden lg:block font-medium">Pomodoro</span>
+                </button>
+                <button onclick="showTab('youtube')" id="nav-youtube" class="nav-btn w-full flex items-center gap-3 px-3 py-3 rounded-xl transition justify-center lg:justify-start">
+                    <span class="text-xl">📺</span>
+                    <span class="hidden lg:block font-medium">YouTube</span>
+                </button>
+                <button onclick="showTab('doubts')" id="nav-doubts" class="nav-btn w-full flex items-center gap-3 px-3 py-3 rounded-xl transition justify-center lg:justify-start">
+                    <span class="text-xl">❓</span>
+                    <span class="hidden lg:block font-medium">Doubts</span>
+                </button>
+                <button onclick="showTab('browser')" id="nav-browser" class="nav-btn w-full flex items-center gap-3 px-3 py-3 rounded-xl transition justify-center lg:justify-start">
+                    <span class="text-xl">🌐</span>
+                    <span class="hidden lg:block font-medium">Browser</span>
+                </button>
+                <button onclick="showTab('forest')" id="nav-forest" class="nav-btn w-full flex items-center gap-3 px-3 py-3 rounded-xl transition justify-center lg:justify-start">
+                    <span class="text-xl">🌳</span>
+                    <span class="hidden lg:block font-medium">My Forest</span>
+                </button>
+                <button onclick="showTab('calendar')" id="nav-calendar" class="nav-btn w-full flex items-center gap-3 px-3 py-3 rounded-xl transition justify-center lg:justify-start">
+                    <span class="text-xl">📅</span>
+                    <span class="hidden lg:block font-medium">Calendar</span>
+                </button>
+                <button onclick="showTab('stats')" id="nav-stats" class="nav-btn w-full flex items-center gap-3 px-3 py-3 rounded-xl transition justify-center lg:justify-start">
+                    <span class="text-xl">📊</span>
+                    <span class="hidden lg:block font-medium">Statistics</span>
+                </button>
+                <button onclick="showTab('settings')" id="nav-settings" class="nav-btn w-full flex items-center gap-3 px-3 py-3 rounded-xl transition justify-center lg:justify-start">
+                    <span class="text-xl">⚙️</span>
+                    <span class="hidden lg:block font-medium">Settings</span>
+                </button>
+            </div>
+            
+            <!-- Bottom Actions -->
+            <div class="space-y-2 pt-4 border-t border-slate-700 mt-4">
+                <button onclick="toggleFullscreen()" class="w-full flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-slate-700/50 transition justify-center lg:justify-start">
+                    <span class="text-xl">⛶</span>
+                    <span class="hidden lg:block font-medium">Fullscreen</span>
+                </button>
+                <button onclick="toggleTheme()" class="w-full flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-slate-700/50 transition justify-center lg:justify-start">
+                    <span class="text-xl" id="themeIcon">🌙</span>
+                    <span class="hidden lg:block font-medium">Theme</span>
+                </button>
+            </div>
+        </nav>
+
+        <!-- ========== RIGHT MAIN CONTENT ========== -->
+        <main class="flex-1 ml-20 lg:ml-64 p-4 lg:p-6 overflow-y-auto min-h-screen">
+            
+            <!-- Focus Mode Overlay -->
+            <div id="focusOverlay" class="fixed inset-0 z-50 focus-overlay hidden items-center justify-center">
+                <div class="text-center p-8">
+                    <div class="text-6xl mb-4">🌳</div>
+                    <h2 class="text-3xl font-bold text-emerald-400 mb-4">Stay Focused!</h2>
+                    <p class="text-xl text-slate-300 mb-6" id="focusMessage">Your tree is growing. Don't leave now!</p>
+                    <div class="text-4xl font-mono text-white mb-6" id="focusTimer">45:00</div>
+                    <div class="space-x-4">
+                        <button onclick="continueFocus()" class="px-6 py-3 bg-emerald-500 hover:bg-emerald-600 rounded-xl font-semibold transition">
+                            Continue Studying
+                        </button>
+                        <button onclick="emergencyUnlock()" class="px-6 py-3 bg-red-500/20 hover:bg-red-500/40 text-red-400 rounded-xl font-semibold transition">
+                            Emergency Exit
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== DASHBOARD TAB ===== -->
+            <div id="tab-dashboard" class="tab-content">
+                <div class="flex items-center justify-between mb-8 flex-wrap gap-4">
+                    <div>
+                        <h1 class="text-2xl lg:text-3xl font-bold">Welcome back! 👋</h1>
+                        <p class="text-slate-400" id="currentDate"></p>
+                    </div>
+                    <div class="glass px-4 py-2 rounded-xl">
+                        <span class="text-emerald-400 font-semibold" id="streakCount">🔥 0 day streak</span>
+                    </div>
+                </div>
+                
+                <!-- Quick Stats -->
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                    <div class="bg-slate-800/50 rounded-2xl p-4 lg:p-6 border border-slate-700">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-slate-400 text-xs lg:text-sm">Today's Focus</p>
+                                <p class="text-xl lg:text-2xl font-bold" id="todayFocus">0h 0m</p>
+                            </div>
+                            <div class="w-10 h-10 lg:w-12 lg:h-12 bg-emerald-500/20 rounded-xl flex items-center justify-center text-xl lg:text-2xl">⏱️</div>
+                        </div>
+                    </div>
+                    <div class="bg-slate-800/50 rounded-2xl p-4 lg:p-6 border border-slate-700">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-slate-400 text-xs lg:text-sm">Pomodoros Today</p>
+                                <p class="text-xl lg:text-2xl font-bold" id="todayPomodoros">0</p>
+                            </div>
+                            <div class="w-10 h-10 lg:w-12 lg:h-12 bg-red-500/20 rounded-xl flex items-center justify-center text-xl lg:text-2xl">🍅</div>
+                        </div>
+                    </div>
+                    <div class="bg-slate-800/50 rounded-2xl p-4 lg:p-6 border border-slate-700">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-slate-400 text-xs lg:text-sm">Trees Grown</p>
+                                <p class="text-xl lg:text-2xl font-bold" id="totalTrees">0</p>
+                            </div>
+                            <div class="w-10 h-10 lg:w-12 lg:h-12 bg-green-500/20 rounded-xl flex items-center justify-center text-xl lg:text-2xl">🌳</div>
+                        </div>
+                    </div>
+                    <div class="bg-slate-800/50 rounded-2xl p-4 lg:p-6 border border-slate-700">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-slate-400 text-xs lg:text-sm">Pending Doubts</p>
+                                <p class="text-xl lg:text-2xl font-bold" id="pendingDoubts">0</p>
+                            </div>
+                            <div class="w-10 h-10 lg:w-12 lg:h-12 bg-yellow-500/20 rounded-xl flex items-center justify-center text-xl lg:text-2xl">❓</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Start -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 bg-slate-800/50 rounded-2xl p-6 border border-slate-700">
+                        <h3 class="text-xl font-semibold mb-4">Quick Start Session</h3>
+                        <div class="flex items-center gap-6 flex-wrap">
+                            <div class="relative">
+                                <svg class="w-28 h-28 lg:w-32 lg:h-32 progress-ring">
+                                    <circle cx="56" cy="56" r="48" stroke="#1e293b" stroke-width="8" fill="none"/>
+                                    <circle id="dashboardProgress" cx="56" cy="56" r="48" stroke="#10b981" stroke-width="8" fill="none" 
+                                        stroke-dasharray="301.59" stroke-dashoffset="0" stroke-linecap="round"/>
+                                </svg>
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                    <span class="text-xl lg:text-2xl font-mono font-bold" id="dashboardTimer">45:00</span>
+                                </div>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-slate-400 mb-4">Start a focus session to grow your tree</p>
+                                <div class="flex gap-3 flex-wrap">
+                                    <button onclick="showTab('pomodoro'); setTimeout(startTimer, 100)" class="px-6 py-3 bg-emerald-500 hover:bg-emerald-600 rounded-xl font-semibold transition">
+                                        Start Focus
+                                    </button>
+                                    <button onclick="showTab('youtube')" class="px-6 py-3 bg-slate-700 hover:bg-slate-600 rounded-xl font-semibold transition">
+                                        Watch Lecture
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Current Tree -->
+                    <div class="bg-gradient-to-b from-slate-800/50 to-emerald-900/20 rounded-2xl p-6 border border-slate-700">
+                        <h3 class="text-xl font-semibold mb-4">Current Tree</h3>
+                        <div id="miniTreeDisplay" class="h-32 flex items-end justify-center">
+                            <div class="text-6xl">🌱</div>
+                        </div>
+                        <div class="mt-4">
+                            <div class="flex justify-between text-sm mb-1">
+                                <span class="text-slate-400">Growth Progress</span>
+                                <span id="treeProgress">0%</span>
+                            </div>
+                            <div class="h-2 bg-slate-700 rounded-full overflow-hidden">
+                                <div id="treeProgressBar" class="h-full bg-emerald-500 transition-all duration-500" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="mt-6 bg-slate-800/50 rounded-2xl p-6 border border-slate-700">
+                    <h3 class="text-xl font-semibold mb-4">Recent Activity</h3>
+                    <div id="recentActivity" class="space-y-3">
+                        <p class="text-slate-400 text-center py-4">No recent activity. Start a focus session!</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== POMODORO TAB ===== -->
+            <div id="tab-pomodoro" class="tab-content hidden">
+                <h1 class="text-2xl lg:text-3xl font-bold mb-8">Pomodoro Timer</h1>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Main Timer -->
+                    <div class="lg:col-span-2 bg-slate-800/50 rounded-2xl p-6 lg:p-8 border border-slate-700">
+                        <div class="flex flex-col items-center">
+                            <!-- Session Type Tabs -->
+                            <div class="flex gap-2 mb-8 flex-wrap justify-center">
+                                <button onclick="setSessionType('focus')" id="btn-focus" class="session-btn px-6 py-2 rounded-xl font-semibold bg-emerald-500">Focus</button>
+                                <button onclick="setSessionType('shortBreak')" id="btn-shortBreak" class="session-btn px-6 py-2 rounded-xl font-semibold bg-slate-700">Short Break</button>
+                                <button onclick="setSessionType('longBreak')" id="btn-longBreak" class="session-btn px-6 py-2 rounded-xl font-semibold bg-slate-700">Long Break</button>
+                            </div>
+                            
+                            <!-- Timer Display -->
+                            <div class="relative mb-8">
+                                <svg class="w-56 h-56 lg:w-72 lg:h-72 progress-ring">
+                                    <circle cx="50%" cy="50%" r="45%" stroke="#1e293b" stroke-width="12" fill="none"/>
+                                    <circle id="timerProgress" cx="50%" cy="50%" r="45%" stroke="#10b981" stroke-width="12" fill="none" 
+                                        stroke-dasharray="1000" stroke-dashoffset="0" stroke-linecap="round"/>
+                                </svg>
+                                <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                    <span class="text-4xl lg:text-6xl font-mono font-bold" id="timerDisplay">45:00</span>
+                                    <span class="text-slate-400 mt-2" id="sessionLabel">Focus Time</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Timer Controls -->
+                            <div class="flex gap-4 flex-wrap justify-center">
+                                <button onclick="startTimer()" id="startBtn" class="px-8 py-4 bg-emerald-500 hover:bg-emerald-600 rounded-xl font-semibold text-lg transition">
+                                    ▶ Start
+                                </button>
+                                <button onclick="pauseTimer()" id="pauseBtn" class="hidden px-8 py-4 bg-yellow-500 hover:bg-yellow-600 rounded-xl font-semibold text-lg transition">
+                                    ⏸ Pause
+                                </button>
+                                <button onclick="resumeTimer()" id="resumeBtn" class="hidden px-8 py-4 bg-emerald-500 hover:bg-emerald-600 rounded-xl font-semibold text-lg transition">
+                                    ▶ Resume
+                                </button>
+                                <button onclick="resetTimer()" class="px-8 py-4 bg-slate-700 hover:bg-slate-600 rounded-xl font-semibold text-lg transition">
+                                    ↺ Reset
+                                </button>
+                            </div>
+                            
+                            <!-- Strict Mode -->
+                            <div class="mt-6">
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" id="strictMode" class="w-5 h-5 rounded accent-emerald-500">
+                                    <span>Strict Focus Mode</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tree Growing -->
+                    <div class="bg-gradient-to-b from-slate-800/50 to-emerald-900/30 rounded-2xl p-6 border border-slate-700">
+                        <h3 class="text-xl font-semibold mb-4 text-center">Your Tree is Growing</h3>
+                        <div id="treeContainer" class="h-48 lg:h-64 relative flex items-end justify-center overflow-hidden">
+                            <div class="absolute bottom-0 w-full h-8 bg-gradient-to-t from-amber-800/50 to-transparent rounded-b-2xl"></div>
+                            <div id="treeDisplay" class="tree-sway text-7xl lg:text-8xl z-10 transition-all duration-1000">🌱</div>
+                            <div id="particles" class="absolute inset-0 pointer-events-none"></div>
+                        </div>
+                        <div class="mt-4 text-center">
+                            <p class="text-slate-400" id="treeStage">Seed</p>
+                            <div class="mt-3">
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span>Growth</span>
+                                    <span id="growthPercent">0%</span>
+                                </div>
+                                <div class="h-3 bg-slate-700 rounded-full overflow-hidden">
+                                    <div id="growthBar" class="h-full bg-gradient-to-r from-emerald-500 to-green-400 transition-all duration-500" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Session History -->
+                <div class="mt-6 bg-slate-800/50 rounded-2xl p-6 border border-slate-700">
+                    <h3 class="text-xl font-semibold mb-4">Today's Sessions</h3>
+                    <div id="sessionHistory" class="space-y-3">
+                        <p class="text-slate-400 text-center py-4">No sessions completed today</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== YOUTUBE TAB ===== -->
+            <div id="tab-youtube" class="tab-content hidden">
+                <h1 class="text-2xl lg:text-3xl font-bold mb-8">YouTube Learning</h1>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 space-y-4">
+                        <div class="bg-slate-800/50 rounded-2xl p-4 border border-slate-700">
+                            <div class="flex gap-2 mb-4 flex-wrap">
+                                <input type="text" id="youtubeUrl" placeholder="Paste YouTube URL here..." 
+                                    class="flex-1 min-w-[200px] px-4 py-3 bg-slate-700 rounded-xl border border-slate-600 focus:border-emerald-500 outline-none">
+                                <button onclick="loadYouTubeVideo()" class="px-6 py-3 bg-red-500 hover:bg-red-600 rounded-xl font-semibold transition">
+                                    Load Video
+                                </button>
+                            </div>
+                            <div id="youtubePlayer" class="aspect-video bg-slate-900 rounded-xl overflow-hidden flex items-center justify-center">
+                                <p class="text-slate-400">Paste a YouTube URL to start learning</p>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-slate-800/50 rounded-2xl p-4 border border-slate-700">
+                            <div class="flex items-center justify-between flex-wrap gap-4">
+                                <div class="flex items-center gap-4 flex-wrap">
+                                    <button onclick="toggleYouTubeTracking()" id="ytTrackBtn" class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 rounded-lg font-semibold transition">
+                                        Start Tracking
+                                    </button>
+                                    <div class="text-slate-400">
+                                        Watch Time: <span id="ytWatchTime" class="text-white font-mono">00:00:00</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-2xl" id="ytTreeIcon">🌱</span>
+                                    <span class="text-sm text-slate-400">Knowledge Tree</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="bg-slate-800/50 rounded-2xl p-4 border border-slate-700">
+                            <h3 class="font-semibold mb-3">Quick Add Doubt</h3>
+                            <textarea id="quickDoubt" placeholder="Type your doubt here..." 
+                                class="w-full px-3 py-2 bg-slate-700 rounded-lg border border-slate-600 focus:border-emerald-500 outline-none resize-none h-20"></textarea>
+                            <button onclick="addQuickDoubt()" class="mt-2 w-full py-2 bg-yellow-500 hover:bg-yellow-600 rounded-lg font-semibold transition">
+                                Save Doubt ❓
+                            </button>
+                        </div>
+                        
+                        <div class="bg-slate-800/50 rounded-2xl p-4 border border-slate-700 max-h-80 overflow-y-auto">
+                            <h3 class="font-semibold mb-3">Watch History</h3>
+                            <div id="watchHistory" class="space-y-3">
+                                <p class="text-slate-400 text-sm text-center py-4">No videos watched yet</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== DOUBTS TAB ===== -->
+            <div id="tab-doubts" class="tab-content hidden">
+                <div class="flex items-center justify-between mb-8 flex-wrap gap-4">
+                    <h1 class="text-2xl lg:text-3xl font-bold">Doubts Manager</h1>
+                    <button onclick="openDoubtModal()" class="px-6 py-3 bg-emerald-500 hover:bg-emerald-600 rounded-xl font-semibold transition">
+                        + Add Doubt
+                    </button>
+                </div>
+                
+                <div class="flex gap-2 lg:gap-4 mb-6 flex-wrap">
+                    <button onclick="filterDoubts('all')" id="filter-all" class="filter-btn px-3 lg:px-4 py-2 bg-emerald-500 rounded-lg font-semibold text-sm">All</button>
+                    <button onclick="filterDoubts('pending')" id="filter-pending" class="filter-btn px-3 lg:px-4 py-2 bg-slate-700 rounded-lg font-semibold text-sm">Pending</button>
+                    <button onclick="filterDoubts('inprogress')" id="filter-inprogress" class="filter-btn px-3 lg:px-4 py-2 bg-slate-700 rounded-lg font-semibold text-sm">In Progress</button>
+                    <button onclick="filterDoubts('solved')" id="filter-solved" class="filter-btn px-3 lg:px-4 py-2 bg-slate-700 rounded-lg font-semibold text-sm">Solved</button>
+                    <input type="text" id="doubtSearch" placeholder="Search..." 
+                        class="px-4 py-2 bg-slate-700 rounded-lg border border-slate-600 focus:border-emerald-500 outline-none text-sm" onkeyup="searchDoubts()">
+                </div>
+                
+                <div id="doubtsList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div class="col-span-full text-center py-12 text-slate-400">
+                        <div class="text-6xl mb-4">📝</div>
+                        <p>No doubts yet. Add your first doubt!</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== BROWSER TAB ===== -->
+            <div id="tab-browser" class="tab-content hidden">
+                <div class="bg-slate-800/50 rounded-2xl border border-slate-700 overflow-hidden" style="height: calc(100vh - 120px);">
+                    <div class="flex items-center gap-2 p-3 bg-slate-800 border-b border-slate-700 flex-wrap">
+                        <button onclick="browserBack()" class="p-2 hover:bg-slate-700 rounded-lg transition">←</button>
+                        <button onclick="browserForward()" class="p-2 hover:bg-slate-700 rounded-lg transition">→</button>
+                        <button onclick="browserRefresh()" class="p-2 hover:bg-slate-700 rounded-lg transition">↻</button>
+                        <button onclick="browserHome()" class="p-2 hover:bg-slate-700 rounded-lg transition">🏠</button>
+                        <input type="text" id="browserUrl" placeholder="Enter URL or search..." 
+                            class="flex-1 min-w-[120px] px-4 py-2 bg-slate-700 rounded-lg border border-slate-600 focus:border-emerald-500 outline-none"
+                            onkeydown="if(event.key==='Enter')navigateTo()">
+                        <button onclick="navigateTo()" class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 rounded-lg font-semibold transition">Go</button>
+                        <button onclick="addBookmark()" class="p-2 hover:bg-slate-700 rounded-lg transition" title="Add Bookmark">⭐</button>
+                    </div>
+                    
+                    <div id="bookmarksBar" class="flex items-center gap-2 px-3 py-2 bg-slate-800/50 border-b border-slate-700 overflow-x-auto">
+                        <span class="text-sm text-slate-400 shrink-0">Bookmarks:</span>
+                        <button onclick="navigateToUrl('https://www.google.com')" class="px-3 py-1 bg-slate-700 hover:bg-slate-600 rounded text-sm whitespace-nowrap">Google</button>
+                        <button onclick="navigateToUrl('https://www.wikipedia.org')" class="px-3 py-1 bg-slate-700 hover:bg-slate-600 rounded text-sm whitespace-nowrap">Wikipedia</button>
+                    </div>
+                    
+                    <iframe id="browserFrame" src="https://www.google.com/webhp?igu=1" class="w-full" style="height: calc(100% - 100px);" sandbox="allow-same-origin allow-scripts allow-forms allow-popups"></iframe>
+                </div>
+            </div>
+
+            <!-- ===== FOREST TAB ===== -->
+            <div id="tab-forest" class="tab-content hidden">
+                <h1 class="text-2xl lg:text-3xl font-bold mb-8">My Forest 🌲</h1>
+                
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                    <div class="bg-slate-800/50 rounded-2xl p-4 border border-slate-700 text-center">
+                        <p class="text-3xl lg:text-4xl font-bold text-emerald-400" id="forestTotalTrees">0</p>
+                        <p class="text-slate-400 text-sm">Total Trees</p>
+                    </div>
+                    <div class="bg-slate-800/50 rounded-2xl p-4 border border-slate-700 text-center">
+                        <p class="text-3xl lg:text-4xl font-bold text-blue-400" id="forestFocusHours">0h</p>
+                        <p class="text-slate-400 text-sm">Focus Hours</p>
+                    </div>
+                    <div class="bg-slate-800/50 rounded-2xl p-4 border border-slate-700 text-center">
+                        <p class="text-3xl lg:text-4xl font-bold text-yellow-400" id="forestStreak">0</p>
+                        <p class="text-slate-400 text-sm">Day Streak</p>
+                    </div>
+                    <div class="bg-slate-800/50 rounded-2xl p-4 border border-slate-700 text-center">
+                        <p class="text-3xl lg:text-4xl font-bold text-purple-400" id="forestAchievements">0</p>
+                        <p class="text-slate-400 text-sm">Achievements</p>
+                    </div>
+                </div>
+                
+                <div class="bg-slate-800/50 rounded-2xl p-6 border border-slate-700 mb-6">
+                    <h3 class="text-xl font-semibold mb-4">Achievements</h3>
+                    <div id="achievementsList" class="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4"></div>
+                </div>
+                
+                <div class="bg-gradient-to-b from-slate-800/50 to-emerald-900/20 rounded-2xl p-6 border border-slate-700 min-h-64">
+                    <h3 class="text-xl font-semibold mb-4">Your Forest</h3>
+                    <div id="forestDisplay" class="grid grid-cols-5 md:grid-cols-8 lg:grid-cols-10 gap-4">
+                        <p class="col-span-full text-center text-slate-400 py-12">Complete focus sessions to grow your forest!</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== CALENDAR TAB ===== -->
+            <div id="tab-calendar" class="tab-content hidden">
+                <h1 class="text-2xl lg:text-3xl font-bold mb-8">Activity Calendar 📅</h1>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 bg-slate-800/50 rounded-2xl p-4 lg:p-6 border border-slate-700">
+                        <div class="flex items-center justify-between mb-6">
+                            <button onclick="changeMonth(-1)" class="p-2 hover:bg-slate-700 rounded-lg transition text-xl">←</button>
+                            <h3 class="text-lg lg:text-xl font-semibold" id="calendarMonth">January 2025</h3>
+                            <button onclick="changeMonth(1)" class="p-2 hover:bg-slate-700 rounded-lg transition text-xl">→</button>
+                        </div>
+                        <div class="grid grid-cols-7 gap-1 lg:gap-2 mb-2">
+                            <div class="text-center text-slate-400 text-xs lg:text-sm font-medium">Sun</div>
+                            <div class="text-center text-slate-400 text-xs lg:text-sm font-medium">Mon</div>
+                            <div class="text-center text-slate-400 text-xs lg:text-sm font-medium">Tue</div>
+                            <div class="text-center text-slate-400 text-xs lg:text-sm font-medium">Wed</div>
+                            <div class="text-center text-slate-400 text-xs lg:text-sm font-medium">Thu</div>
+                            <div class="text-center text-slate-400 text-xs lg:text-sm font-medium">Fri</div>
+                            <div class="text-center text-slate-400 text-xs lg:text-sm font-medium">Sat</div>
+                        </div>
+                        <div id="calendarGrid" class="grid grid-cols-7 gap-1 lg:gap-2"></div>
+                    </div>
+                    
+                    <div class="bg-slate-800/50 rounded-2xl p-6 border border-slate-700">
+                        <h3 class="text-xl font-semibold mb-4" id="selectedDateTitle">Select a date</h3>
+                        <div id="dayDetails" class="space-y-4">
+                            <p class="text-slate-400 text-center py-8">Click on a date to see details</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== STATISTICS TAB ===== -->
+            <div id="tab-stats" class="tab-content hidden">
+                <h1 class="text-2xl lg:text-3xl font-bold mb-8">Statistics 📊</h1>
+                
+                <div class="flex gap-2 mb-6 flex-wrap">
+                    <button onclick="setStatsRange('week')" id="range-week" class="range-btn px-4 py-2 bg-emerald-500 rounded-lg font-semibold">This Week</button>
+                    <button onclick="setStatsRange('month')" id="range-month" class="range-btn px-4 py-2 bg-slate-700 rounded-lg font-semibold">This Month</button>
+                    <button onclick="setStatsRange('all')" id="range-all" class="range-btn px-4 py-2 bg-slate-700 rounded-lg font-semibold">All Time</button>
+                </div>
+                
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                    <div class="bg-slate-800/50 rounded-2xl p-4 lg:p-6 border border-slate-700">
+                        <p class="text-slate-400 text-xs lg:text-sm">Total Focus Time</p>
+                        <p class="text-xl lg:text-3xl font-bold text-emerald-400" id="statsTotalFocus">0h 0m</p>
+                    </div>
+                    <div class="bg-slate-800/50 rounded-2xl p-4 lg:p-6 border border-slate-700">
+                        <p class="text-slate-400 text-xs lg:text-sm">Pomodoros</p>
+                        <p class="text-xl lg:text-3xl font-bold text-red-400" id="statsTotalPomodoros">0</p>
+                    </div>
+                    <div class="bg-slate-800/50 rounded-2xl p-4 lg:p-6 border border-slate-700">
+                        <p class="text-slate-400 text-xs lg:text-sm">YouTube Time</p>
+                        <p class="text-xl lg:text-3xl font-bold text-blue-400" id="statsYouTubeTime">0h 0m</p>
+                    </div>
+                    <div class="bg-slate-800/50 rounded-2xl p-4 lg:p-6 border border-slate-700">
+                        <p class="text-slate-400 text-xs lg:text-sm">Focus Score</p>
+                        <p class="text-xl lg:text-3xl font-bold text-yellow-400" id="statsFocusScore">0%</p>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <div class="bg-slate-800/50 rounded-2xl p-6 border border-slate-700">
+                        <h3 class="text-xl font-semibold mb-4">Daily Focus Time</h3>
+                        <div id="focusChart" class="h-48 flex items-end justify-around gap-2"></div>
+                        <div class="flex justify-around mt-2 text-xs text-slate-400">
+                            <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+                        </div>
+                    </div>
+                    <div class="bg-slate-800/50 rounded-2xl p-6 border border-slate-700">
+                        <h3 class="text-xl font-semibold mb-4">Productive Hours</h3>
+                        <div id="hoursChart" class="h-48 flex items-end justify-around gap-1"></div>
+                        <div class="flex justify-around mt-2 text-xs text-slate-400">
+                            <span>6am</span><span>9am</span><span>12pm</span><span>3pm</span><span>6pm</span><span>9pm</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-slate-800/50 rounded-2xl p-6 border border-slate-700">
+                    <h3 class="text-xl font-semibold mb-4">Export Data</h3>
+                    <div class="flex gap-4 flex-wrap">
+                        <button onclick="exportData('json')" class="px-6 py-3 bg-emerald-500 hover:bg-emerald-600 rounded-xl font-semibold transition">Export JSON</button>
+                        <button onclick="exportData('csv')" class="px-6 py-3 bg-blue-500 hover:bg-blue-600 rounded-xl font-semibold transition">Export CSV</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== SETTINGS TAB ===== -->
+            <div id="tab-settings" class="tab-content hidden">
+                <h1 class="text-2xl lg:text-3xl font-bold mb-8">Settings ⚙️</h1>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-slate-800/50 rounded-2xl p-6 border border-slate-700">
+                        <h3 class="text-xl font-semibold mb-6">Timer Settings</h3>
+                        <div class="space-y-6">
+                            <div>
+                                <label class="block text-sm text-slate-400 mb-2">Focus Duration (minutes)</label>
+                                <input type="range" id="focusDuration" min="25" max="90" value="45" class="w-full accent-emerald-500" oninput="updateSettings()">
+                                <div class="flex justify-between text-sm text-slate-400 mt-1">
+                                    <span>25</span>
+                                    <span id="focusDurationValue">45</span>
+                                    <span>90</span>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm text-slate-400 mb-2">Short Break (minutes)</label>
+                                <input type="range" id="shortBreakDuration" min="5" max="15" value="5" class="w-full accent-emerald-500" oninput="updateSettings()">
+                                <div class="flex justify-between text-sm text-slate-400 mt-1">
+                                    <span>5</span>
+                                    <span id="shortBreakDurationValue">5</span>
+                                    <span>15</span>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm text-slate-400 mb-2">Long Break (minutes)</label>
+                                <input type="range" id="longBreakDuration" min="15" max="30" value="15" class="w-full accent-emerald-500" oninput="updateSettings()">
+                                <div class="flex justify-between text-sm text-slate-400 mt-1">
+                                    <span>15</span>
+                                    <span id="longBreakDurationValue">15</span>
+                                    <span>30</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span>Auto-start next session</span>
+                                <input type="checkbox" id="autoStart" class="w-5 h-5 rounded accent-emerald-500">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-slate-800/50 rounded-2xl p-6 border border-slate-700">
+                        <h3 class="text-xl font-semibold mb-6">Sound Settings</h3>
+                        <div class="space-y-6">
+                            <div>
+                                <label class="block text-sm text-slate-400 mb-2">Notification Sound</label>
+                                <select id="notificationSound" class="w-full px-4 py-3 bg-slate-700 rounded-xl border border-slate-600 focus:border-emerald-500 outline-none">
+                                    <option value="bell">Bell</option>
+                                    <option value="chime">Chime</option>
+                                    <option value="nature">Nature</option>
+                                    <option value="none">None</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm text-slate-400 mb-2">Volume</label>
+                                <input type="range" id="volume" min="0" max="100" value="70" class="w-full accent-emerald-500">
+                            </div>
+                            <button onclick="testSound()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg transition">Test Sound</button>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-slate-800/50 rounded-2xl p-6 border border-slate-700">
+                        <h3 class="text-xl font-semibold mb-6">Focus Mode</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm text-slate-400 mb-2">Blocking Level</label>
+                                <select id="blockingLevel" class="w-full px-4 py-3 bg-slate-700 rounded-xl border border-slate-600 focus:border-emerald-500 outline-none">
+                                    <option value="gentle">Gentle Reminder</option>
+                                    <option value="moderate">Moderate Warning</option>
+                                    <option value="strict">Strict Lock</option>
+                                </select>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span>Show motivational quotes</span>
+                                <input type="checkbox" id="showQuotes" checked class="w-5 h-5 rounded accent-emerald-500">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-slate-800/50 rounded-2xl p-6 border border-slate-700">
+                        <h3 class="text-xl font-semibold mb-6">Data Management</h3>
+                        <div class="space-y-4">
+                            <button onclick="clearAllData()" class="w-full px-4 py-3 bg-red-500/20 hover:bg-red-500/40 text-red-400 rounded-xl font-semibold transition">
+                                Clear All Data
+                            </button>
+                            <button onclick="importData()" class="w-full px-4 py-3 bg-slate-700 hover:bg-slate-600 rounded-xl font-semibold transition">
+                                Import Data
+                            </button>
+                            <input type="file" id="importFile" class="hidden" accept=".json" onchange="handleImport(event)">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Doubt Modal -->
+    <div id="doubtModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+        <div class="bg-slate-800 rounded-2xl p-6 w-full max-w-lg border border-slate-700">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-semibold">Add New Doubt</h3>
+                <button onclick="closeDoubtModal()" class="text-slate-400 hover:text-white text-2xl">&times;</button>
+            </div>
+            <form onsubmit="saveDoubt(event)">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm text-slate-400 mb-2">Doubt/Question</label>
+                        <textarea id="doubtText" required placeholder="Describe your doubt..." 
+                            class="w-full px-4 py-3 bg-slate-700 rounded-xl border border-slate-600 focus:border-emerald-500 outline-none resize-none h-24"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-slate-400 mb-2">Subject/Topic</label>
+                        <input type="text" id="doubtSubject" placeholder="e.g., Physics, Math..." 
+                            class="w-full px-4 py-3 bg-slate-700 rounded-xl border border-slate-600 focus:border-emerald-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-slate-400 mb-2">Priority</label>
+                        <select id="doubtPriority" class="w-full px-4 py-3 bg-slate-700 rounded-xl border border-slate-600 focus:border-emerald-500 outline-none">
+                            <option value="low">Low</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-slate-400 mb-2">Attach Images</label>
+                        <input type="file" id="doubtImages" multiple accept="image/*" 
+                            class="w-full px-4 py-3 bg-slate-700 rounded-xl border border-slate-600 file:mr-4 file:py-1 file:px-4 file:rounded-lg file:border-0 file:bg-emerald-500 file:text-white file:cursor-pointer">
+                    </div>
+                    <div id="imagePreview" class="flex gap-2 flex-wrap"></div>
+                </div>
+                <div class="flex gap-4 mt-6">
+                    <button type="button" onclick="closeDoubtModal()" class="flex-1 px-4 py-3 bg-slate-700 hover:bg-slate-600 rounded-xl font-semibold transition">Cancel</button>
+                    <button type="submit" class="flex-1 px-4 py-3 bg-emerald-500 hover:bg-emerald-600 rounded-xl font-semibold transition">Save Doubt</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Image Viewer Modal -->
+    <div id="imageViewer" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/90 p-4" onclick="closeImageViewer()">
+        <img id="viewerImage" src="" class="max-w-full max-h-full object-contain">
+        <button class="absolute top-4 right-4 text-white text-4xl">&times;</button>
+    </div>
+
+    <!-- Notification Sound -->
+    <audio id="notificationAudio" preload="auto">
+        <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdH2Onp2ckIl/c2lhXmNueIeNjoqEenFqZmVobXV9hIiIhoJ8dnFubW9ydnp+gYODgX56dnNxcHFzdXh7fn+AgH99e3l3dnV1dnd4eXp7fH19fXx7enl4eHh4eXl6e3t8fHx8fHt7enp5eXl5eXp6ent7e3t7e3t7e3p6enp6enp6e3t7e3t7e3t7e3t6enp6" type="audio/wav">
+    </audio>
+
+    <script>
+        // ====== STATE ======
+        let state = {
+            timerRunning: false,
+            timerPaused: false,
+            timeRemaining: 45 * 60,
+            totalTime: 45 * 60,
+            sessionType: 'focus',
+            timerInterval: null,
+            treeGrowth: 0,
+            currentTree: null,
+            youtubeTracking: false,
+            youtubeWatchTime: 0,
+            youtubeInterval: null,
+            currentVideo: null,
+            currentMonth: new Date().getMonth(),
+            currentYear: new Date().getFullYear(),
+            currentFilter: 'all',
+            statsRange: 'week',
+            konamiCode: ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'],
+            konamiIndex: 0
+        };
+
+        // ====== DATA KEYS ======
+        const DB = {
+            SETTINGS: 'sg_settings',
+            SESSIONS: 'sg_sessions',
+            TREES: 'sg_trees',
+            DOUBTS: 'sg_doubts',
+            YOUTUBE: 'sg_youtube',
+            BOOKMARKS: 'sg_bookmarks',
+            ACTIVITIES: 'sg_activities'
+        };
+
+        // ====== STORAGE ======
+        const save = (key, data) => localStorage.setItem(key, JSON.stringify(data));
+        const load = (key, def = null) => { try { return JSON.parse(localStorage.getItem(key)) || def; } catch { return def; } };
+
+        const getSettings = () => load(DB.SETTINGS, {
+            focusDuration: 45, shortBreakDuration: 5, longBreakDuration: 15,
+            autoStart: false, notificationSound: 'bell', volume: 70,
+            blockingLevel: 'moderate', showQuotes: true
+        });
+
+        // ====== NAVIGATION ======
+        function showTab(tabId) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            // Show selected tab
+            const tab = document.getElementById('tab-' + tabId);
+            if (tab) tab.classList.remove('hidden');
+            
+            // Update nav buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active', 'bg-gradient-to-r', 'from-emerald-500', 'to-emerald-600');
+                btn.classList.add('hover:bg-slate-700/50');
+            });
+            const navBtn = document.getElementById('nav-' + tabId);
+            if (navBtn) {
+                navBtn.classList.add('active', 'bg-gradient-to-r', 'from-emerald-500', 'to-emerald-600');
+                navBtn.classList.remove('hover:bg-slate-700/50');
+            }
+            
+            // Tab-specific updates
+            if (tabId === 'forest') updateForestDisplay();
+            if (tabId === 'calendar') renderCalendar();
+            if (tabId === 'stats') updateStats();
+            if (tabId === 'doubts') renderDoubts();
+            if (tabId === 'dashboard') updateDashboard();
+        }
+
+        // ====== TIMER ======
+        function setSessionType(type) {
+            state.sessionType = type;
+            const s = getSettings();
+            
+            document.querySelectorAll('.session-btn').forEach(btn => {
+                btn.classList.remove('bg-emerald-500');
+                btn.classList.add('bg-slate-700');
+            });
+            document.getElementById('btn-' + type)?.classList.remove('bg-slate-700');
+            document.getElementById('btn-' + type)?.classList.add('bg-emerald-500');
+            
+            const times = { focus: s.focusDuration, shortBreak: s.shortBreakDuration, longBreak: s.longBreakDuration };
+            const labels = { focus: 'Focus Time', shortBreak: 'Short Break', longBreak: 'Long Break' };
+            const colors = { focus: '#10b981', shortBreak: '#3b82f6', longBreak: '#8b5cf6' };
+            
+            state.timeRemaining = times[type] * 60;
+            state.totalTime = times[type] * 60;
+            document.getElementById('sessionLabel').textContent = labels[type];
+            document.getElementById('timerProgress').style.stroke = colors[type];
+            
+            updateTimerDisplay();
+        }
+
+        function startTimer() {
+            if (state.timerRunning) return;
+            
+            state.timerRunning = true;
+            state.timerPaused = false;
+            
+            document.getElementById('startBtn').classList.add('hidden');
+            document.getElementById('pauseBtn').classList.remove('hidden');
+            document.getElementById('resumeBtn').classList.add('hidden');
+            
+            state.currentTree = {
+                id: Date.now(),
+                startTime: new Date().toISOString(),
+                type: state.sessionType,
+                duration: state.totalTime
+            };
+            
+            state.timerInterval = setInterval(() => {
+                if (state.timeRemaining > 0) {
+                    state.timeRemaining--;
+                    updateTimerDisplay();
+                    updateTreeGrowth();
+                    
+                    if (document.hidden && state.sessionType === 'focus' && document.getElementById('strictMode')?.checked) {
+                        showFocusOverlay();
+                    }
+                } else {
+                    completeSession();
+                }
+            }, 1000);
+            
+            logActivity('timer_start', `Started ${state.sessionType} session`);
+        }
+
+        function pauseTimer() {
+            state.timerPaused = true;
+            clearInterval(state.timerInterval);
+            document.getElementById('pauseBtn').classList.add('hidden');
+            document.getElementById('resumeBtn').classList.remove('hidden');
+        }
+
+        function resumeTimer() {
+            state.timerPaused = false;
+            document.getElementById('pauseBtn').classList.remove('hidden');
+            document.getElementById('resumeBtn').classList.add('hidden');
+            
+            state.timerInterval = setInterval(() => {
+                if (state.timeRemaining > 0) {
+                    state.timeRemaining--;
+                    updateTimerDisplay();
+                    updateTreeGrowth();
+                } else {
+                    completeSession();
+                }
+            }, 1000);
+        }
+
+        function resetTimer() {
+            clearInterval(state.timerInterval);
+            state.timerRunning = false;
+            state.timerPaused = false;
+            state.treeGrowth = 0;
+            
+            document.getElementById('startBtn').classList.remove('hidden');
+            document.getElementById('pauseBtn').classList.add('hidden');
+            document.getElementById('resumeBtn').classList.add('hidden');
+            
+            setSessionType(state.sessionType);
+            updateTreeDisplay(0);
+        }
+
+        function updateTimerDisplay() {
+            const mins = Math.floor(state.timeRemaining / 60);
+            const secs = state.timeRemaining % 60;
+            const display = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            
+            document.getElementById('timerDisplay').textContent = display;
+            document.getElementById('dashboardTimer').textContent = display;
+            document.getElementById('focusTimer').textContent = display;
+            
+            const progress = (state.totalTime - state.timeRemaining) / state.totalTime;
+            const circumference = 1000;
+            document.getElementById('timerProgress').style.strokeDashoffset = circumference * (1 - progress);
+            document.getElementById('dashboardProgress').style.strokeDashoffset = 301.59 * (1 - progress);
+        }
+
+        function completeSession() {
+            clearInterval(state.timerInterval);
+            state.timerRunning = false;
+            
+            playSound();
+            
+            if (Notification.permission === 'granted') {
+                new Notification('StudyGrove', {
+                    body: state.sessionType === 'focus' ? 'Focus complete! Take a break.' : 'Break over! Ready to focus?',
+                    icon: '🌳'
+                });
+            }
+            
+            if (state.sessionType === 'focus') {
+                state.currentTree.endTime = new Date().toISOString();
+                state.currentTree.growth = 100;
+                
+                const trees = load(DB.TREES, []);
+                trees.push(state.currentTree);
+                save(DB.TREES, trees);
+                
+                const sessions = load(DB.SESSIONS, []);
+                sessions.push({
+                    id: Date.now(),
+                    type: 'focus',
+                    duration: state.currentTree.duration,
+                    completedAt: new Date().toISOString(),
+                    date: new Date().toDateString()
+                });
+                save(DB.SESSIONS, sessions);
+                
+                logActivity('session_complete', 'Completed focus session and grew a tree! 🌳');
+                checkAchievements();
+            }
+            
+            document.getElementById('startBtn').classList.remove('hidden');
+            document.getElementById('pauseBtn').classList.add('hidden');
+            document.getElementById('resumeBtn').classList.add('hidden');
+            
+            const s = getSettings();
+            if (s.autoStart) {
+                if (state.sessionType === 'focus') {
+                    const todaySessions = load(DB.SESSIONS, []).filter(x => x.date === new Date().toDateString());
+                    setSessionType(todaySessions.length % 4 === 0 ? 'longBreak' : 'shortBreak');
+                } else {
+                    setSessionType('focus');
+                }
+                setTimeout(startTimer, 3000);
+            } else {
+                resetTimer();
+            }
+            
+            updateDashboard();
+            updateSessionHistory();
+        }
+
+        function updateTreeGrowth() {
+            const elapsed = state.totalTime - state.timeRemaining;
+            state.treeGrowth = (elapsed / state.totalTime) * 100;
+            updateTreeDisplay(state.treeGrowth);
+        }
+
+        function updateTreeDisplay(growth) {
+            const stages = [
+                { t: 0, e: '🌱', n: 'Seed' },
+                { t: 15, e: '🌿', n: 'Sprout' },
+                { t: 30, e: '🪴', n: 'Sapling' },
+                { t: 50, e: '🌲', n: 'Young Tree' },
+                { t: 75, e: '🌳', n: 'Mature Tree' },
+                { t: 90, e: '🎄', n: 'Flourishing' }
+            ];
+            
+            let stage = stages[0];
+            for (const s of stages) if (growth >= s.t) stage = s;
+            
+            const tree = document.getElementById('treeDisplay');
+            const mini = document.getElementById('miniTreeDisplay');
+            
+            if (tree) {
+                tree.textContent = stage.e;
+                tree.style.fontSize = `${5 + (growth / 12)}rem`;
+            }
+            if (mini) mini.innerHTML = `<div class="text-6xl">${stage.e}</div>`;
+            
+            document.getElementById('treeStage').textContent = stage.n;
+            document.getElementById('growthPercent').textContent = `${Math.round(growth)}%`;
+            document.getElementById('growthBar').style.width = `${growth}%`;
+            document.getElementById('treeProgress').textContent = `${Math.round(growth)}%`;
+            document.getElementById('treeProgressBar').style.width = `${growth}%`;
+            
+            if (growth >= 90) addParticles();
+        }
+
+        function addParticles() {
+            const p = document.getElementById('particles');
+            if (p && Math.random() > 0.9) {
+                const leaf = document.createElement('div');
+                leaf.className = 'absolute leaf-fall text-xl';
+                leaf.style.left = `${Math.random() * 100}%`;
+                leaf.textContent = ['🍃', '🍂', '🌸'][Math.floor(Math.random() * 3)];
+                p.appendChild(leaf);
+                setTimeout(() => leaf.remove(), 3000);
+            }
+        }
+
+        function updateSessionHistory() {
+            const sessions = load(DB.SESSIONS, []).filter(s => s.date === new Date().toDateString());
+            const el = document.getElementById('sessionHistory');
+            if (!el) return;
+            
+            if (sessions.length === 0) {
+                el.innerHTML = '<p class="text-slate-400 text-center py-4">No sessions completed today</p>';
+                return;
+            }
+            
+            el.innerHTML = sessions.map(s => `
+                <div class="flex items-center justify-between p-3 bg-slate-700/50 rounded-xl">
+                    <div class="flex items-center gap-3">
+                        <span class="text-2xl">${s.type === 'focus' ? '🍅' : '☕'}</span>
+                        <div>
+                            <p class="font-semibold">${s.type === 'focus' ? 'Focus Session' : 'Break'}</p>
+                            <p class="text-sm text-slate-400">${formatDuration(s.duration)}</p>
+                        </div>
+                    </div>
+                    <span class="text-sm text-slate-400">${new Date(s.completedAt).toLocaleTimeString()}</span>
+                </div>
+            `).join('');
+        }
+
+        // ====== FOCUS OVERLAY ======
+        function showFocusOverlay() {
+            const msgs = ["Your tree is growing!", "Stay focused!", "Almost there!", "You're doing great!", "Focus is power!"];
+            document.getElementById('focusMessage').textContent = msgs[Math.floor(Math.random() * msgs.length)];
+            document.getElementById('focusOverlay').classList.remove('hidden');
+            document.getElementById('focusOverlay').classList.add('flex');
+        }
+
+        function continueFocus() {
+            document.getElementById('focusOverlay').classList.add('hidden');
+            document.getElementById('focusOverlay').classList.remove('flex');
+        }
+
+        function emergencyUnlock() {
+            if (confirm('Are you sure? Your tree will not be saved.')) {
+                resetTimer();
+                document.getElementById('focusOverlay').classList.add('hidden');
+                document.getElementById('focusOverlay').classList.remove('flex');
+                logActivity('focus_break', 'Emergency exit');
+            }
+        }
+
+        // ====== YOUTUBE ======
+        function loadYouTubeVideo() {
+            const url = document.getElementById('youtubeUrl').value;
+            const match = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+            
+            if (!match) { alert('Invalid YouTube URL'); return; }
+            
+            const videoId = match[1];
+            document.getElementById('youtubePlayer').innerHTML = `
+                <iframe src="https://www.youtube.com/embed/${videoId}" class="w-full h-full" frameborder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowfullscreen></iframe>
+            `;
+            
+            state.currentVideo = { id: videoId, url: url, startTime: new Date().toISOString() };
+            logActivity('youtube_load', 'Loaded YouTube video');
+        }
+
+        function toggleYouTubeTracking() {
+            state.youtubeTracking = !state.youtubeTracking;
+            const btn = document.getElementById('ytTrackBtn');
+            
+            if (state.youtubeTracking) {
+                btn.textContent = 'Stop Tracking';
+                btn.classList.remove('bg-emerald-500');
+                btn.classList.add('bg-red-500');
+                state.youtubeInterval = setInterval(() => {
+                    state.youtubeWatchTime++;
+                    updateYouTubeDisplay();
+                }, 1000);
+            } else {
+                btn.textContent = 'Start Tracking';
+                btn.classList.remove('bg-red-500');
+                btn.classList.add('bg-emerald-500');
+                clearInterval(state.youtubeInterval);
+                saveYouTubeSession();
+            }
+        }
+
+        function updateYouTubeDisplay() {
+            const h = Math.floor(state.youtubeWatchTime / 3600);
+            const m = Math.floor((state.youtubeWatchTime % 3600) / 60);
+            const s = state.youtubeWatchTime % 60;
+            document.getElementById('ytWatchTime').textContent = 
+                `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+            
+            const progress = Math.min((state.youtubeWatchTime / 2700) * 100, 100);
+            const icons = ['🌱', '🌿', '🪴', '📚', '📖', '🎓'];
+            document.getElementById('ytTreeIcon').textContent = icons[Math.min(Math.floor(progress / 20), 5)];
+        }
+
+        function saveYouTubeSession() {
+            if (state.youtubeWatchTime > 60) {
+                const history = load(DB.YOUTUBE, []);
+                history.push({
+                    id: Date.now(),
+                    videoId: state.currentVideo?.id,
+                    url: state.currentVideo?.url,
+                    watchTime: state.youtubeWatchTime,
+                    date: new Date().toISOString()
+                });
+                save(DB.YOUTUBE, history);
+                updateWatchHistory();
+                logActivity('youtube_watch', `Watched ${formatDuration(state.youtubeWatchTime)}`);
+            }
+            state.youtubeWatchTime = 0;
+            updateYouTubeDisplay();
+        }
+
+        function updateWatchHistory() {
+            const history = load(DB.YOUTUBE, []);
+            const el = document.getElementById('watchHistory');
+            if (!el) return;
+            
+            if (history.length === 0) {
+                el.innerHTML = '<p class="text-slate-400 text-sm text-center py-4">No videos watched yet</p>';
+                return;
+            }
+            
+            el.innerHTML = history.slice(-10).reverse().map(h => `
+                <div class="p-3 bg-slate-700/50 rounded-lg">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xl">📺</span>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm truncate">${h.url || 'Video'}</p>
+                            <p class="text-xs text-slate-400">${formatDuration(h.watchTime)} • ${new Date(h.date).toLocaleDateString()}</p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function addQuickDoubt() {
+            const text = document.getElementById('quickDoubt').value.trim();
+            if (!text) return;
+            
+            const doubts = load(DB.DOUBTS, []);
+            doubts.push({
+                id: Date.now(),
+                text: text,
+                subject: 'Quick Note',
+                priority: 'medium',
+                status: 'pending',
+                images: [],
+                createdAt: new Date().toISOString(),
+                videoContext: state.currentVideo?.url || null
+            });
+            save(DB.DOUBTS, doubts);
+            
+            document.getElementById('quickDoubt').value = '';
+            logActivity('doubt_add', 'Added quick doubt');
+            updateDashboard();
+        }
+
+        // ====== DOUBTS ======
+        function openDoubtModal() {
+            document.getElementById('doubtModal').classList.remove('hidden');
+            document.getElementById('doubtModal').classList.add('flex');
+        }
+
+        function closeDoubtModal() {
+            document.getElementById('doubtModal').classList.add('hidden');
+            document.getElementById('doubtModal').classList.remove('flex');
+            document.getElementById('doubtText').value = '';
+            document.getElementById('doubtSubject').value = '';
+            document.getElementById('doubtImages').value = '';
+            document.getElementById('imagePreview').innerHTML = '';
+        }
+
+        async function saveDoubt(e) {
+            e.preventDefault();
+            
+            const text = document.getElementById('doubtText').value;
+            const subject = document.getElementById('doubtSubject').value;
+            const priority = document.getElementById('doubtPriority').value;
+            const files = document.getElementById('doubtImages').files;
+            
+            const images = [];
+            for (const file of files) {
+                images.push(await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(file);
+                }));
+            }
+            
+            const doubts = load(DB.DOUBTS, []);
+            doubts.push({
+                id: Date.now(),
+                text, subject: subject || 'General', priority, status: 'pending', images,
+                createdAt: new Date().toISOString()
+            });
+            save(DB.DOUBTS, doubts);
+            
+            closeDoubtModal();
+            renderDoubts();
+            updateDashboard();
+            logActivity('doubt_add', `Added doubt: ${text.substring(0, 30)}...`);
+        }
+
+        function renderDoubts() {
+            const doubts = load(DB.DOUBTS, []);
+            const search = document.getElementById('doubtSearch')?.value.toLowerCase() || '';
+            
+            let filtered = state.currentFilter === 'all' ? doubts : doubts.filter(d => d.status === state.currentFilter);
+            if (search) filtered = filtered.filter(d => d.text.toLowerCase().includes(search) || d.subject.toLowerCase().includes(search));
+            
+            const el = document.getElementById('doubtsList');
+            if (!el) return;
+            
+            if (filtered.length === 0) {
+                el.innerHTML = `<div class="col-span-full text-center py-12 text-slate-400"><div class="text-6xl mb-4">📝</div><p>No doubts found</p></div>`;
+                return;
+            }
+            
+            const pColors = { low: 'bg-blue-500/20 text-blue-400', medium: 'bg-yellow-500/20 text-yellow-400', high: 'bg-red-500/20 text-red-400' };
+            const sColors = { pending: 'bg-orange-500/20 text-orange-400', inprogress: 'bg-blue-500/20 text-blue-400', solved: 'bg-green-500/20 text-green-400' };
+            
+            el.innerHTML = filtered.map(d => `
+                <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700">
+                    <div class="flex items-start justify-between mb-3">
+                        <span class="px-2 py-1 rounded text-xs font-semibold ${pColors[d.priority]}">${d.priority}</span>
+                        <span class="px-2 py-1 rounded text-xs font-semibold ${sColors[d.status]}">${d.status}</span>
+                    </div>
+                    <p class="font-medium mb-2">${d.text}</p>
+                    <p class="text-sm text-slate-400 mb-3">${d.subject}</p>
+                    ${d.images.length > 0 ? `<div class="flex gap-2 mb-3 overflow-x-auto">${d.images.map(img => `<img src="${img}" class="w-16 h-16 object-cover rounded cursor-pointer hover:opacity-80" onclick="viewImage('${img}')">`).join('')}</div>` : ''}
+                    <div class="flex gap-2 text-sm flex-wrap">
+                        <select onchange="updateDoubtStatus(${d.id}, this.value)" class="px-2 py-1 bg-slate-700 rounded text-xs">
+                            <option value="pending" ${d.status === 'pending' ? 'selected' : ''}>Pending</option>
+                            <option value="inprogress" ${d.status === 'inprogress' ? 'selected' : ''}>In Progress</option>
+                            <option value="solved" ${d.status === 'solved' ? 'selected' : ''}>Solved</option>
+                        </select>
+                        <button onclick="deleteDoubt(${d.id})" class="px-2 py-1 bg-red-500/20 text-red-400 rounded text-xs hover:bg-red-500/40">Delete</button>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-2">${new Date(d.createdAt).toLocaleString()}</p>
+                </div>
+            `).join('');
+        }
+
+        function filterDoubts(filter) {
+            state.currentFilter = filter;
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('bg-emerald-500');
+                btn.classList.add('bg-slate-700');
+            });
+            document.getElementById('filter-' + filter)?.classList.remove('bg-slate-700');
+            document.getElementById('filter-' + filter)?.classList.add('bg-emerald-500');
+            renderDoubts();
+        }
+
+        function searchDoubts() { renderDoubts(); }
+
+        function updateDoubtStatus(id, status) {
+            const doubts = load(DB.DOUBTS, []);
+            const doubt = doubts.find(d => d.id === id);
+            if (doubt) { doubt.status = status; save(DB.DOUBTS, doubts); renderDoubts(); }
+        }
+
+        function deleteDoubt(id) {
+            if (!confirm('Delete this doubt?')) return;
+            save(DB.DOUBTS, load(DB.DOUBTS, []).filter(d => d.id !== id));
+            renderDoubts();
+            updateDashboard();
+        }
+
+        function viewImage(src) {
+            document.getElementById('viewerImage').src = src;
+            document.getElementById('imageViewer').classList.remove('hidden');
+            document.getElementById('imageViewer').classList.add('flex');
+        }
+
+        function closeImageViewer() {
+            document.getElementById('imageViewer').classList.add('hidden');
+            document.getElementById('imageViewer').classList.remove('flex');
+        }
+
+        // ====== BROWSER ======
+        function navigateTo() {
+            let url = document.getElementById('browserUrl').value;
+            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                url = url.includes('.') && !url.includes(' ') ? 'https://' + url : `https://www.google.com/search?q=${encodeURIComponent(url)}&igu=1`;
+            }
+            document.getElementById('browserFrame').src = url;
+        }
+
+        function navigateToUrl(url) {
+            document.getElementById('browserUrl').value = url;
+            document.getElementById('browserFrame').src = url;
+        }
+
+        function browserBack() { try { document.getElementById('browserFrame').contentWindow.history.back(); } catch {} }
+        function browserForward() { try { document.getElementById('browserFrame').contentWindow.history.forward(); } catch {} }
+        function browserRefresh() { const f = document.getElementById('browserFrame'); f.src = f.src; }
+        function browserHome() { navigateToUrl('https://www.google.com/webhp?igu=1'); }
+
+        function addBookmark() {
+            const url = document.getElementById('browserUrl').value;
+            const name = prompt('Bookmark name:', url.substring(0, 20));
+            if (name) {
+                const bookmarks = load(DB.BOOKMARKS, []);
+                bookmarks.push({ name, url });
+                save(DB.BOOKMARKS, bookmarks);
+                updateBookmarksBar();
+            }
+        }
+
+        function updateBookmarksBar() {
+            const bookmarks = load(DB.BOOKMARKS, []);
+            const el = document.getElementById('bookmarksBar');
+            if (!el) return;
+            
+            el.innerHTML = `
+                <span class="text-sm text-slate-400 shrink-0">Bookmarks:</span>
+                <button onclick="navigateToUrl('https://www.google.com')" class="px-3 py-1 bg-slate-700 hover:bg-slate-600 rounded text-sm whitespace-nowrap">Google</button>
+                <button onclick="navigateToUrl('https://www.wikipedia.org')" class="px-3 py-1 bg-slate-700 hover:bg-slate-600 rounded text-sm whitespace-nowrap">Wikipedia</button>
+                ${bookmarks.map(b => `<button onclick="navigateToUrl('${b.url}')" class="px-3 py-1 bg-slate-700 hover:bg-slate-600 rounded text-sm whitespace-nowrap">${b.name}</button>`).join('')}
+            `;
+        }
+
+        // ====== FOREST ======
+        function updateForestDisplay() {
+            const trees = load(DB.TREES, []);
+            const sessions = load(DB.SESSIONS, []);
+            const streak = calculateStreak();
+            const achievements = getAchievements();
+            
+            document.getElementById('forestTotalTrees').textContent = trees.length;
+            document.getElementById('forestFocusHours').textContent = `${Math.round(sessions.reduce((s, t) => s + t.duration, 0) / 3600)}h`;
+            document.getElementById('forestStreak').textContent = streak;
+            document.getElementById('forestAchievements').textContent = achievements.filter(a => a.unlocked).length;
+            
+            document.getElementById('achievementsList').innerHTML = achievements.map(a => `
+                <div class="text-center p-3 rounded-xl ${a.unlocked ? 'bg-emerald-500/20' : 'bg-slate-700/50'}">
+                    <span class="text-2xl lg:text-3xl ${a.unlocked ? '' : 'opacity-30'}">${a.icon}</span>
+                    <p class="text-xs mt-2 ${a.unlocked ? 'text-white' : 'text-slate-500'}">${a.name}</p>
+                </div>
+            `).join('');
+            
+            const forestEl = document.getElementById('forestDisplay');
+            if (trees.length === 0) {
+                forestEl.innerHTML = '<p class="col-span-full text-center text-slate-400 py-12">Complete focus sessions to grow your forest!</p>';
+            } else {
+                const treeEmojis = ['🌲', '🌳', '🌴', '🎄', '🌵', '🌾'];
+                forestEl.innerHTML = trees.map(t => `
+                    <div class="text-center p-2 hover:scale-110 transition cursor-pointer" title="${new Date(t.startTime).toLocaleDateString()}">
+                        <span class="text-2xl lg:text-3xl">${treeEmojis[Math.floor(Math.random() * treeEmojis.length)]}</span>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function calculateStreak() {
+            const sessions = load(DB.SESSIONS, []);
+            if (sessions.length === 0) return 0;
+            
+            const dates = [...new Set(sessions.map(s => s.date))].sort().reverse();
+            let streak = 0;
+            let current = new Date();
+            
+            for (const dateStr of dates) {
+                const date = new Date(dateStr);
+                if (Math.floor((current - date) / 86400000) <= 1) { streak++; current = date; }
+                else break;
+            }
+            return streak;
+        }
+
+        function getAchievements() {
+            const trees = load(DB.TREES, []);
+            const sessions = load(DB.SESSIONS, []);
+            const streak = calculateStreak();
+            const totalSecs = sessions.reduce((s, t) => s + t.duration, 0);
+            
+            return [
+                { name: 'First Tree', icon: '🌱', unlocked: trees.length >= 1 },
+                { name: '10 Trees', icon: '🌿', unlocked: trees.length >= 10 },
+                { name: '50 Trees', icon: '🌳', unlocked: trees.length >= 50 },
+                { name: '100 Trees', icon: '🏆', unlocked: trees.length >= 100 },
+                { name: '3 Day Streak', icon: '🔥', unlocked: streak >= 3 },
+                { name: '7 Day Streak', icon: '⚡', unlocked: streak >= 7 },
+                { name: '30 Day Streak', icon: '💎', unlocked: streak >= 30 },
+                { name: '10 Hours', icon: '⏰', unlocked: totalSecs >= 36000 },
+                { name: '50 Hours', icon: '🎯', unlocked: totalSecs >= 180000 },
+                { name: 'Early Bird', icon: '🌅', unlocked: sessions.some(s => new Date(s.completedAt).getHours() < 7) },
+                { name: 'Night Owl', icon: '🦉', unlocked: sessions.some(s => new Date(s.completedAt).getHours() >= 22) },
+                { name: 'Weekend', icon: '🗓️', unlocked: sessions.some(s => [0, 6].includes(new Date(s.completedAt).getDay())) }
+            ];
+        }
+
+        function checkAchievements() {
+            const achievements = getAchievements();
+            const prev = load('sg_unlocked', []);
+            
+            achievements.forEach(a => {
+                if (a.unlocked && !prev.includes(a.name)) {
+                    showAchievementNotification(a);
+                    prev.push(a.name);
+                }
+            });
+            save('sg_unlocked', prev);
+        }
+
+        function showAchievementNotification(a) {
+            const el = document.createElement('div');
+            el.className = 'fixed top-4 right-4 bg-emerald-500 text-white px-6 py-4 rounded-xl shadow-lg z-50 animate-bounce';
+            el.innerHTML = `<div class="flex items-center gap-3"><span class="text-3xl">${a.icon}</span><div><p class="font-bold">Achievement Unlocked!</p><p>${a.name}</p></div></div>`;
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 5000);
+        }
+
+        // ====== CALENDAR ======
+        function renderCalendar() {
+            const year = state.currentYear;
+            const month = state.currentMonth;
+            
+            document.getElementById('calendarMonth').textContent = new Date(year, month).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+            
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const today = new Date();
+            const sessions = load(DB.SESSIONS, []);
+            const doubts = load(DB.DOUBTS, []);
+            
+            let html = '';
+            for (let i = 0; i < firstDay; i++) html += '<div></div>';
+            
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateStr = new Date(year, month, day).toDateString();
+                const hasData = sessions.some(s => s.date === dateStr) || doubts.some(d => new Date(d.createdAt).toDateString() === dateStr);
+                const isToday = today.getDate() === day && today.getMonth() === month && today.getFullYear() === year;
+                
+                html += `<button onclick="selectDate(${year}, ${month}, ${day})" 
+                    class="calendar-day aspect-square flex items-center justify-center rounded-lg transition text-sm
+                    ${isToday ? 'today' : ''} ${hasData ? 'has-data' : ''}">${day}</button>`;
+            }
+            
+            document.getElementById('calendarGrid').innerHTML = html;
+        }
+
+        function changeMonth(delta) {
+            state.currentMonth += delta;
+            if (state.currentMonth > 11) { state.currentMonth = 0; state.currentYear++; }
+            else if (state.currentMonth < 0) { state.currentMonth = 11; state.currentYear--; }
+            renderCalendar();
+        }
+
+        function selectDate(year, month, day) {
+            const dateStr = new Date(year, month, day).toDateString();
+            document.getElementById('selectedDateTitle').textContent = dateStr;
+            
+            const sessions = load(DB.SESSIONS, []).filter(s => s.date === dateStr);
+            const doubts = load(DB.DOUBTS, []).filter(d => new Date(d.createdAt).toDateString() === dateStr);
+            const youtube = load(DB.YOUTUBE, []).filter(y => new Date(y.date).toDateString() === dateStr);
+            
+            const totalFocus = sessions.reduce((sum, s) => sum + s.duration, 0);
+            const totalYT = youtube.reduce((sum, y) => sum + y.watchTime, 0);
+            
+            document.getElementById('dayDetails').innerHTML = `
+                <div class="space-y-4">
+                    <div class="bg-slate-700/50 rounded-lg p-4">
+                        <h4 class="font-semibold mb-2">📊 Summary</h4>
+                        <p class="text-sm text-slate-400">Focus Time: ${formatDuration(totalFocus)}</p>
+                        <p class="text-sm text-slate-400">Pomodoros: ${sessions.length}</p>
+                        <p class="text-sm text-slate-400">YouTube: ${formatDuration(totalYT)}</p>
+                        <p class="text-sm text-slate-400">Doubts Added: ${doubts.length}</p>
+                    </div>
+                    ${sessions.length > 0 ? `<div class="bg-slate-700/50 rounded-lg p-4"><h4 class="font-semibold mb-2">🍅 Sessions</h4>${sessions.map(s => `<p class="text-sm text-slate-400">${new Date(s.completedAt).toLocaleTimeString()} - ${formatDuration(s.duration)}</p>`).join('')}</div>` : ''}
+                    ${doubts.length > 0 ? `<div class="bg-slate-700/50 rounded-lg p-4"><h4 class="font-semibold mb-2">❓ Doubts</h4>${doubts.map(d => `<p class="text-sm text-slate-400 truncate">${d.text}</p>`).join('')}</div>` : ''}
+                </div>
+            `;
+        }
+
+        // ====== STATISTICS ======
+        function setStatsRange(range) {
+            state.statsRange = range;
+            document.querySelectorAll('.range-btn').forEach(btn => {
+                btn.classList.remove('bg-emerald-500');
+                btn.classList.add('bg-slate-700');
+            });
+            document.getElementById('range-' + range)?.classList.remove('bg-slate-700');
+            document.getElementById('range-' + range)?.classList.add('bg-emerald-500');
+            updateStats();
+        }
+
+        function updateStats() {
+            const sessions = load(DB.SESSIONS, []);
+            const youtube = load(DB.YOUTUBE, []);
+            const now = new Date();
+            
+            let filteredS = sessions, filteredY = youtube;
+            if (state.statsRange === 'week') {
+                const weekAgo = new Date(now - 7 * 86400000);
+                filteredS = sessions.filter(s => new Date(s.completedAt) >= weekAgo);
+                filteredY = youtube.filter(y => new Date(y.date) >= weekAgo);
+            } else if (state.statsRange === 'month') {
+                const monthAgo = new Date(now - 30 * 86400000);
+                filteredS = sessions.filter(s => new Date(s.completedAt) >= monthAgo);
+                filteredY = youtube.filter(y => new Date(y.date) >= monthAgo);
+            }
+            
+            const totalFocus = filteredS.reduce((sum, s) => sum + s.duration, 0);
+            const totalYT = filteredY.reduce((sum, y) => sum + y.watchTime, 0);
+            
+            document.getElementById('statsTotalFocus').textContent = formatDuration(totalFocus);
+            document.getElementById('statsTotalPomodoros').textContent = filteredS.length;
+            document.getElementById('statsYouTubeTime').textContent = formatDuration(totalYT);
+            document.getElementById('statsFocusScore').textContent = `${Math.min(Math.round((totalFocus / 14400) * 100), 100)}%`;
+            
+            // Charts
+            const dayData = [0, 0, 0, 0, 0, 0, 0];
+            filteredS.forEach(s => { dayData[new Date(s.completedAt).getDay()] += s.duration; });
+            const maxDay = Math.max(...dayData, 1);
+            document.getElementById('focusChart').innerHTML = dayData.map(v => `<div class="flex-1 bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t" style="height: ${Math.max((v / maxDay) * 100, 5)}%"></div>`).join('');
+            
+            const hourData = Array(24).fill(0);
+            filteredS.forEach(s => { hourData[new Date(s.completedAt).getHours()] += s.duration; });
+            const maxHour = Math.max(...hourData, 1);
+            document.getElementById('hoursChart').innerHTML = hourData.slice(6, 22).map(v => `<div class="flex-1 bg-gradient-to-t from-blue-500 to-blue-400 rounded-t" style="height: ${Math.max((v / maxHour) * 100, 5)}%"></div>`).join('');
+        }
+
+        function exportData(format) {
+            const data = {
+                sessions: load(DB.SESSIONS, []),
+                trees: load(DB.TREES, []),
+                doubts: load(DB.DOUBTS, []),
+                youtube: load(DB.YOUTUBE, []),
+                settings: getSettings(),
+                exportedAt: new Date().toISOString()
+            };
+            
+            let content, filename, type;
+            if (format === 'json') {
+                content = JSON.stringify(data, null, 2);
+                filename = 'studygrove_export.json';
+                type = 'application/json';
+            } else {
+                const rows = [['Date', 'Type', 'Duration'], ...data.sessions.map(s => [new Date(s.completedAt).toLocaleString(), s.type, Math.round(s.duration / 60)])];
+                content = rows.map(r => r.join(',')).join('\n');
+                filename = 'studygrove_sessions.csv';
+                type = 'text/csv';
+            }
+            
+            const blob = new Blob([content], { type });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = filename;
+            a.click();
+        }
+
+        // ====== SETTINGS ======
+        function updateSettings() {
+            const settings = getSettings();
+            settings.focusDuration = parseInt(document.getElementById('focusDuration').value);
+            settings.shortBreakDuration = parseInt(document.getElementById('shortBreakDuration').value);
+            settings.longBreakDuration = parseInt(document.getElementById('longBreakDuration').value);
+            settings.autoStart = document.getElementById('autoStart').checked;
+            settings.notificationSound = document.getElementById('notificationSound').value;
+            settings.volume = parseInt(document.getElementById('volume').value);
+            settings.blockingLevel = document.getElementById('blockingLevel').value;
+            settings.showQuotes = document.getElementById('showQuotes').checked;
+            
+            save(DB.SETTINGS, settings);
+            
+            document.getElementById('focusDurationValue').textContent = settings.focusDuration;
+            document.getElementById('shortBreakDurationValue').textContent = settings.shortBreakDuration;
+            document.getElementById('longBreakDurationValue').textContent = settings.longBreakDuration;
+            
+            if (!state.timerRunning) setSessionType(state.sessionType);
+        }
+
+        function loadSettingsUI() {
+            const s = getSettings();
+            document.getElementById('focusDuration').value = s.focusDuration;
+            document.getElementById('shortBreakDuration').value = s.shortBreakDuration;
+            document.getElementById('longBreakDuration').value = s.longBreakDuration;
+            document.getElementById('autoStart').checked = s.autoStart;
+            document.getElementById('notificationSound').value = s.notificationSound;
+            document.getElementById('volume').value = s.volume;
+            document.getElementById('blockingLevel').value = s.blockingLevel;
+            document.getElementById('showQuotes').checked = s.showQuotes;
+            
+            document.getElementById('focusDurationValue').textContent = s.focusDuration;
+            document.getElementById('shortBreakDurationValue').textContent = s.shortBreakDuration;
+            document.getElementById('longBreakDurationValue').textContent = s.longBreakDuration;
+            
+            state.timeRemaining = s.focusDuration * 60;
+            state.totalTime = s.focusDuration * 60;
+            updateTimerDisplay();
+        }
+
+        function testSound() { playSound(); }
+        function playSound() {
+            const audio = document.getElementById('notificationAudio');
+            const s = getSettings();
+            if (s.notificationSound !== 'none') {
+                audio.volume = s.volume / 100;
+                audio.play().catch(() => {});
+            }
+        }
+
+        function clearAllData() {
+            if (!confirm('Delete all data?')) return;
+            if (!confirm('This cannot be undone. Continue?')) return;
+            Object.values(DB).forEach(k => localStorage.removeItem(k));
+            location.reload();
+        }
+
+        function importData() { document.getElementById('importFile').click(); }
+        function handleImport(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                try {
+                    const data = JSON.parse(ev.target.result);
+                    if (data.sessions) save(DB.SESSIONS, data.sessions);
+                    if (data.trees) save(DB.TREES, data.trees);
+                    if (data.doubts) save(DB.DOUBTS, data.doubts);
+                    if (data.youtube) save(DB.YOUTUBE, data.youtube);
+                    if (data.settings) save(DB.SETTINGS, data.settings);
+                    alert('Imported successfully!');
+                    location.reload();
+                } catch { alert('Invalid file format.'); }
+            };
+            reader.readAsText(file);
+        }
+
+        // ====== UTILITIES ======
+        function formatDuration(secs) {
+            const h = Math.floor(secs / 3600);
+            const m = Math.floor((secs % 3600) / 60);
+            return h > 0 ? `${h}h ${m}m` : `${m}m`;
+        }
+
+        function logActivity(type, message) {
+            const activities = load(DB.ACTIVITIES, []);
+            activities.push({ type, message, timestamp: new Date().toISOString() });
+            if (activities.length > 100) activities.shift();
+            save(DB.ACTIVITIES, activities);
+        }
+
+        function updateDashboard() {
+            const sessions = load(DB.SESSIONS, []);
+            const trees = load(DB.TREES, []);
+            const doubts = load(DB.DOUBTS, []).filter(d => d.status === 'pending');
+            const todaySessions = sessions.filter(s => s.date === new Date().toDateString());
+            
+            document.getElementById('todayFocus').textContent = formatDuration(todaySessions.reduce((s, t) => s + t.duration, 0));
+            document.getElementById('todayPomodoros').textContent = todaySessions.length;
+            document.getElementById('totalTrees').textContent = trees.length;
+            document.getElementById('pendingDoubts').textContent = doubts.length;
+            document.getElementById('streakCount').textContent = `🔥 ${calculateStreak()} day streak`;
+            
+            const activities = load(DB.ACTIVITIES, []);
+            const el = document.getElementById('recentActivity');
+            if (activities.length === 0) {
+                el.innerHTML = '<p class="text-slate-400 text-center py-4">No recent activity. Start a focus session!</p>';
+            } else {
+                el.innerHTML = activities.slice(-5).reverse().map(a => `
+                    <div class="flex items-center gap-3 p-3 bg-slate-700/30 rounded-lg">
+                        <span class="text-xl">${a.type.includes('timer') ? '⏱️' : a.type.includes('youtube') ? '📺' : a.type.includes('doubt') ? '❓' : '📝'}</span>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm truncate">${a.message}</p>
+                            <p class="text-xs text-slate-400">${new Date(a.timestamp).toLocaleString()}</p>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+            else document.exitFullscreen();
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('bg-slate-100');
+            document.body.classList.toggle('text-slate-800');
+            const icon = document.getElementById('themeIcon');
+            icon.textContent = icon.textContent === '🌙' ? '☀️' : '🌙';
+        }
+
+        // ====== KONAMI CODE ======
+        document.addEventListener('keydown', (e) => {
+            if (e.key === state.konamiCode[state.konamiIndex]) {
+                state.konamiIndex++;
+                if (state.konamiIndex === state.konamiCode.length) {
+                    activateSecret();
+                    state.konamiIndex = 0;
+                }
+            } else state.konamiIndex = 0;
+        });
+
+        function activateSecret() {
+            document.body.classList.add('secret-activated');
+            const el = document.createElement('div');
+            el.className = 'fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur p-4';
+            el.innerHTML = `
+                <div class="text-center p-8">
+                    <div class="text-8xl mb-4">🎮</div>
+                    <h2 class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 mb-4">SECRET UNLOCKED!</h2>
+                    <p class="text-xl text-white mb-6">You found the Konami Code Easter Egg!</p>
+                    <div class="space-y-2 text-slate-300 mb-6">
+                        <p>🎁 Bonus: +5 trees added!</p>
+                        <p>🏆 Secret Finder unlocked!</p>
+                    </div>
+                    <button onclick="this.parentElement.parentElement.remove(); document.body.classList.remove('secret-activated');" 
+                        class="px-8 py-4 bg-gradient-to-r from-pink-500 to-purple-500 rounded-xl font-bold text-lg hover:scale-105 transition">Awesome! 🎉</button>
+                </div>
+            `;
+            document.body.appendChild(el);
+            
+            const trees = load(DB.TREES, []);
+            for (let i = 0; i < 5; i++) trees.push({ id: Date.now() + i, startTime: new Date().toISOString(), type: 'bonus', duration: 2700, growth: 100 });
+            save(DB.TREES, trees);
+        }
+
+        // ====== IMAGE PREVIEW ======
+        document.getElementById('doubtImages')?.addEventListener('change', function(e) {
+            const preview = document.getElementById('imagePreview');
+            preview.innerHTML = '';
+            for (const file of e.target.files) {
+                const reader = new FileReader();
+                reader.onload = (ev) => { preview.innerHTML += `<img src="${ev.target.result}" class="w-16 h-16 object-cover rounded">`; };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // ====== INIT ======
+        function init() {
+            if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission();
+            
+            document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            
+            loadSettingsUI();
+            updateDashboard();
+            updateSessionHistory();
+            updateWatchHistory();
+            updateBookmarksBar();
+            renderDoubts();
+            
+            // Set initial nav button style
+            document.getElementById('nav-dashboard').classList.add('bg-gradient-to-r', 'from-emerald-500', 'to-emerald-600');
+            
+            console.log('🌳 StudyGrove initialized!');
+            console.log('💡 Hint: Try the Konami Code! ↑↑↓↓←→←→BA');
+        }
+
+        init();
+    </script>
+</body>
+</html>
